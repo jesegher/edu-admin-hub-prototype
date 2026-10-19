@@ -9,7 +9,7 @@
     ['study', 'Study and Learn agent', "Makes the Study and Learn agent available to students in Copilot Chat. When off, students can't use it and it can't be pre-selected.", 'Students', 'Education', 'cp'],
     ['preselect', 'Pre-select Study and Learn agent in Copilot Chat', 'Students get coaching that helps them work through questions without receiving answers or completed work.', 'Students', 'Education', 'cp'],
     ['teach', 'Teach module', 'Lesson planning, differentiation, rubrics and assessment drafting, grounded in connected curriculum.', 'Educators', 'Copilot', 'cp'],
-    ['insights', 'Educator Insights agent', "Educators ask questions about their own classes' progress, based on roster, assignment and LMS data.", 'Educators', 'Copilot', 'cp'],
+    ['insights', 'Class Insight Agent', "Educators ask questions about their own classes' progress, based on roster, assignment and LMS data.", 'Educators', 'Copilot', 'cp'],
     ['reading', 'Reading Coach', 'Personalized, AI-powered stories and independent reading fluency practice.', 'Students', 'Education', 'la'],
     ['progress', 'Reading Progress', 'Recorded reading fluency assignments in Teams.', 'Everyone', 'Teams', 'la'],
     ['search', 'Search Coach', 'Helps students form effective queries and judge source reliability.', 'Everyone', 'Teams', 'la'],
@@ -18,9 +18,9 @@
   ];
   const newAdminControls = new Set(['study', 'teach', 'insights', 'progress', 'search', 'speaker', 'math']);
   const catalogs = [
-    ['schoology', 'SC', 'Schoology', 'MCP server', 'Teach, Study and Learn, Insights'],
-    ['moodle', 'MO', 'Moodle', 'MCP server', 'Teach, Study and Learn, Insights'],
-    ['brightspace', 'BS', 'D2L Brightspace', 'MCP server', 'Teach, Study and Learn, Insights'],
+    ['schoology', 'SC', 'Schoology', 'MCP server', 'Teach, Study and Learn, Class Insight Agent'],
+    ['moodle', 'MO', 'Moodle', 'MCP server', 'Teach, Study and Learn, Class Insight Agent'],
+    ['brightspace', 'BS', 'D2L Brightspace', 'MCP server', 'Teach, Study and Learn, Class Insight Agent'],
     ['curriculum', 'DL', 'District curriculum library', 'SharePoint · Copilot connector', 'Teach, Study and Learn'],
     ['standards', 'ST', 'State standards', 'Standards alignment for lessons', 'Teach'],
     ['custom', '+', 'Custom MCP server', 'Your own or a partner endpoint', 'Requires Entra app registration and admin review of each tool.']
@@ -206,7 +206,7 @@
     return heading('Connectors & data', 'Keep rosters in sync and connect the data your agents use. Each does a different job.') +
       `<div class="tiles flow">${[
         ['Roster & identity', 'School Data Sync', 'Your SIS → Entra ID & Teams', 'Users, groups, classes and enrollments. Drives accounts, class teams and age group classification.'],
-        ['Agent data', 'Agent connectors', 'LMS & content → Copilot agents', 'Courses, assignments, rubrics and curriculum for Teach, Study and Learn and Educator Insights.']
+        ['Agent data', 'Agent connectors', 'LMS & content → Copilot agents', 'Courses, assignments, rubrics and curriculum for Teach, Study and Learn and Class Insight Agent.']
       ].map(([category, title, direction, description]) => `<div class="tile"><span class="eyebrow">${category}</span><h3>${title}</h3><strong class="small">${direction}</strong><p>${description}</p></div>`).join('')}</div>
       <section class="card padded"><div class="section-head"><h2>School Data Sync</h2>${badge(state.sdsHealthy ? 'Healthy' : '27 records failed', state.sdsHealthy ? 'good' : 'warn')}</div><p class="small">Creates and updates users, groups and classes from your student information system.</p>
       <div class="connector-row"><span class="connector-logo">SD</span><div class="copy"><h3>PowerSchool SIS via OneRoster</h3><p>18,940 students · 1,612 educators · 2,860 classes</p>${feeds('Users, Groups, Classes')}<p>${state.sdsHealthy ? 'Last sample sync: just now' : 'Last sync 3 days ago'}</p></div>${button(state.sdsHealthy ? 'View sync details' : 'Review 27 errors', 'sds')}</div>
@@ -215,9 +215,9 @@
       <div class="connector-row"><span class="connector-logo">OS</span><div class="copy"><h3>OpenStax open textbooks</h3><p>52 openly licensed textbooks that agents can cite. Managed by Microsoft, so there's nothing to connect.</p>${feeds('Teach, Study and Learn')}</div>${badge(state.openstax ? 'On' : 'Off', state.openstax ? 'good' : 'neutral')}</div>
       ${toggle('openstax', 'Use OpenStax in agents', state.openstax)}
       <div class="actions">${toggle('openstaxTeach', 'Teach · educators', state.openstaxTeach, !state.openstax)}${toggle('openstaxStudy', 'Study and Learn · students', state.openstaxStudy, !state.openstax)}</div>
-      ${state.canvas ? `<div class="connector-row"><span class="connector-logo">CA</span><div class="copy"><h3>Canvas</h3><p>214 classes · Courses, assignments, due dates, rubrics and submission status</p>${feeds('Teach, Study and Learn, Insights')}</div>${badge('Connected', 'good')}${button('Manage', 'canvas-manage')}</div>` : ''}
+      ${state.canvas ? `<div class="connector-row"><span class="connector-logo">CA</span><div class="copy"><h3>Canvas</h3><p>214 classes · Courses, assignments, due dates, rubrics and submission status</p>${feeds('Teach, Study and Learn, Class Insight Agent')}</div>${badge('Connected', 'good')}${button('Manage', 'canvas-manage')}</div>` : ''}
       ${state.connections.map(id => { const entry = catalogs.find(item => item[0] === id); return `<div class="connector-row"><span class="connector-logo">${entry[1]}</span><div class="copy"><h3>${entry[2]}</h3><p>${entry[3]} · Simulated connection</p>${feeds(entry[4])}</div>${badge('Connected', 'good')}${button('Disconnect', 'disconnect', false, `data-id="${id}"`)}</div>`; }).join('')}</section>
-      ${!state.canvas ? `<section class="card padded recommendation"><div class="section-head"><h2>Connect Canvas to your agents</h2>${badge('Recommended', 'info')}</div><p class="small">Your agents can't see Canvas data yet. Connecting gives Teach and Study and Learn courses, assignments, due dates and rubrics, and gives Educator Insights submission status.</p>${feeds('Teach, Study and Learn, Insights')}<div class="actions" style="margin-top:18px">${button('Connect Canvas', 'canvas', true)}</div></section>` : ''}
+      ${!state.canvas ? `<section class="card padded recommendation"><div class="section-head"><h2>Connect Canvas to your agents</h2>${badge('Recommended', 'info')}</div><p class="small">Your agents can't see Canvas data yet. Connecting gives Teach and Study and Learn courses, assignments, due dates and rubrics, and gives Class Insight Agent submission status.</p>${feeds('Teach, Study and Learn, Class Insight Agent')}<div class="actions" style="margin-top:18px">${button('Connect Canvas', 'canvas', true)}</div></section>` : ''}
       <h2 style="margin:24px 0 16px">Available agent connectors</h2><div class="connector-grid">${catalogs.map(([id, logo, name, description, agents]) => `<section class="card"><span class="connector-logo">${logo}</span><h3>${name}</h3><p>${description}</p>${feeds(agents)}${button(state.connections.includes(id) ? 'Connected' : id === 'custom' ? 'Add server' : 'Connect', 'connect', false, `data-id="${id}" ${state.connections.includes(id) ? 'disabled' : ''}`)}</section>`).join('')}</div>`;
   }
   function makeWizard() {
@@ -288,10 +288,10 @@
     });
   }
   function connectionDialog(id) {
-    const entry = id === 'canvas' ? ['canvas', 'CA', 'Canvas', 'LMS agent data', 'Teach, Study and Learn, Insights'] : catalogs.find(item => item[0] === id);
+    const entry = id === 'canvas' ? ['canvas', 'CA', 'Canvas', 'LMS agent data', 'Teach, Study and Learn, Class Insight Agent'] : catalogs.find(item => item[0] === id);
     if (!entry) return;
     const custom = id === 'custom';
-    openDialog(`Connect ${entry[2]}`, `<p>This simulates admin consent. No sign-in, credentials or network requests are made.</p><h3>Review data access</h3><ul class="change-list">${(custom ? ['Admin-reviewed read-only tools', 'Authorized sample data only'] : ['Courses and curriculum content', 'Assignments, due dates and rubrics', ...(id === 'canvas' ? ['Submission status for Educator Insights'] : [])]).map(text => `<li>${text}</li>`).join('')}</ul>${feeds(entry[4])}${custom ? '<label class="field">Sample HTTPS endpoint<input type="url" id="endpoint" placeholder="https://example.org/mcp" autocomplete="off"></label><p>Use a fictional endpoint only. It is validated locally and never contacted or saved.</p><div id="endpoint-error" class="error" role="alert" hidden></div>' : ''}<div class="callout">Existing user permissions still apply in the concept.</div>`, 'Connect sample data', () => {
+    openDialog(`Connect ${entry[2]}`, `<p>This simulates admin consent. No sign-in, credentials or network requests are made.</p><h3>Review data access</h3><ul class="change-list">${(custom ? ['Admin-reviewed read-only tools', 'Authorized sample data only'] : ['Courses and curriculum content', 'Assignments, due dates and rubrics', ...(id === 'canvas' ? ['Submission status for Class Insight Agent'] : [])]).map(text => `<li>${text}</li>`).join('')}</ul>${feeds(entry[4])}${custom ? '<label class="field">Sample HTTPS endpoint<input type="url" id="endpoint" placeholder="https://example.org/mcp" autocomplete="off"></label><p>Use a fictional endpoint only. It is validated locally and never contacted or saved.</p><div id="endpoint-error" class="error" role="alert" hidden></div>' : ''}<div class="callout">Existing user permissions still apply in the concept.</div>`, 'Connect sample data', () => {
       if (custom) {
         const field = dialog.querySelector('#endpoint');
         let valid = false;
@@ -332,7 +332,7 @@
       state.sdsHealthy = true; record('Resolved and re-imported 27 sample School Data Sync records'); finish('27 sample records re-imported. Roster readiness is healthy.');
     }),
     canvas: () => connectionDialog('canvas'),
-    'canvas-manage': () => openDialog('Manage Canvas agent data', `<p>Connected to 214 sample classes for Teach, Study and Learn and Educator Insights.</p><div class="callout">Disconnecting removes agent access to Canvas data.</div>`, 'Disconnect agent data', () => {
+    'canvas-manage': () => openDialog('Manage Canvas agent data', `<p>Connected to 214 sample classes for Teach, Study and Learn and Class Insight Agent.</p><div class="callout">Disconnecting removes agent access to Canvas data.</div>`, 'Disconnect agent data', () => {
       state.canvas = false; record('Disconnected Canvas agent data'); finish('Canvas agent data disconnected.');
     }),
     'wizard-next': () => { wizard.step = Math.min(4, wizard.step + 1); render(true); },

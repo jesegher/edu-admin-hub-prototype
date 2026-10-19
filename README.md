@@ -28,7 +28,7 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
 - **Apps & agents:** filter and toggle settings. Disabling Study and Learn also
   clears and disables pre-selection. A purple **New** badge marks the seven
   owner-selected new admin controls in both this page and guided setup:
-  Study and Learn agent, Teach module, Educator Insights agent, Reading Progress,
+  Study and Learn agent, Teach module, Class Insight Agent, Reading Progress,
   Search Coach, Speaker Progress and Math Progress. Badges identify new controls in this
   concept, not new apps or shipping availability; all other controls are unmarked.
 - **Connectors & data:** review and retry sample sync errors, connect Canvas
