@@ -81,6 +81,8 @@ p { color: var(--text-muted); }
 .badge.bad { background: var(--danger-bg); color: var(--danger); }
 .badge.info { background: var(--info-bg); color: var(--accent); }
 .badge.neutral { background: var(--surface-hover); color: var(--text-muted); }
+.badge.new-control { background: #f3e8ff; color: #7c3aed; }
+[data-theme="dark"] .badge.new-control { background: rgba(168,85,247,.12); color: #c084fc; }
 .banner { display: flex; align-items: center; gap: 20px; border: 1px solid var(--warning); background: var(--warning-bg); padding: 20px 24px; border-radius: 12px; margin-bottom: 24px; }
 .banner .banner-icon { font-size: 1.5rem; color: var(--warning); }
 .banner p { color: var(--text); font-size: .78rem; margin-top: 4px; }
@@ -106,6 +108,7 @@ tbody tr:hover { background: var(--surface-hover); }
 .tile p { font-size: .76rem; flex: 1; }
 .setting { display: flex; align-items: center; gap: 22px; padding: 19px 0; border-top: 1px solid var(--border); }
 .setting .copy { flex: 1; min-width: 0; }
+.setting-title { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .setting p { font-size: .76rem; max-width: 650px; margin-top: 4px; }
 .setting label { font-weight: 600; font-size: .83rem; }
 .setting .source { font-size: .65rem; color: var(--text-muted); border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; }

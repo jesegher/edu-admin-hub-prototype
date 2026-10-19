@@ -16,6 +16,7 @@
     ['speaker', 'Speaker Progress', 'Presentation practice with feedback on pace, filler words and more.', 'Everyone', 'Teams', 'la'],
     ['math', 'Math Progress', 'Practice problem sets with step-by-step feedback.', 'Everyone', 'Teams', 'la']
   ];
+  const newAdminControls = new Set(['study', 'teach', 'insights', 'progress', 'search', 'speaker', 'math']);
   const catalogs = [
     ['schoology', 'SC', 'Schoology', 'MCP server', 'Teach, Study and Learn, Insights'],
     ['moodle', 'MO', 'Moodle', 'MCP server', 'Teach, Study and Learn, Insights'],
@@ -188,11 +189,13 @@
   function appSetting(app, model = state.apps, wizardMode = false) {
     const [id, title, description, audience, source] = app;
     const disabled = id === 'preselect' && !model.study;
-    return `<div class="setting"><div class="copy"><label for="${wizardMode ? 'w-' : ''}app-${id}">${title}</label><p>${description}${disabled ? ' Turn on Study and Learn to enable pre-selection.' : ''}</p></div><span class="small muted">${audience}</span><span class="source">${source}</span><input type="checkbox" role="switch" class="switch" id="${wizardMode ? 'w-' : ''}app-${id}" data-app="${id}" ${wizardMode ? 'data-wizard' : ''} ${model[id] ? 'checked' : ''} ${disabled ? 'disabled' : ''}></div>`;
+    const controlId = `${wizardMode ? 'w-' : ''}app-${id}`;
+    const isNew = newAdminControls.has(id);
+    return `<div class="setting"><div class="copy"><div class="setting-title"><label for="${controlId}">${title}</label>${isNew ? `<span class="badge new-control" id="${controlId}-new">New<span class="sr-only"> admin control in this concept</span></span>` : ''}</div><p>${description}${disabled ? ' Turn on Study and Learn to enable pre-selection.' : ''}</p></div><span class="small muted">${audience}</span><span class="source">${source}</span><input type="checkbox" role="switch" class="switch" id="${controlId}" data-app="${id}" ${isNew ? `aria-describedby="${controlId}-new"` : ''} ${wizardMode ? 'data-wizard' : ''} ${model[id] ? 'checked' : ''} ${disabled ? 'disabled' : ''}></div>`;
   }
   function appScreen() {
     return heading('Apps & agents', 'Copilot agents and Learning Accelerators, gathered from Copilot settings and Microsoft Education settings.') +
-      `<div class="filters" role="group" aria-label="Filter settings">${[['all', 'All settings'], ['cp', 'Copilot & agents'], ['la', 'Learning Accelerators']].map(([id, label]) => `<button class="btn" data-filter="${id}" aria-pressed="${filter === id}">${escape(label)}</button>`).join('')}</div>
+      `<p class="small" style="margin-bottom:18px"><strong>New</strong> marks new admin controls in this concept, not newly released apps or shipping availability.</p><div class="filters" role="group" aria-label="Filter settings">${[['all', 'All settings'], ['cp', 'Copilot & agents'], ['la', 'Learning Accelerators']].map(([id, label]) => `<button class="btn" data-filter="${id}" aria-pressed="${filter === id}">${escape(label)}</button>`).join('')}</div>
       ${[['cp', 'Copilot & agents'], ['la', 'Learning Accelerators']].filter(([id]) => filter === 'all' || filter === id).map(([id, title]) => `<section class="card padded"><div class="section-head"><h2>${escape(title)}</h2>${badge('Saved automatically', 'neutral')}</div>${apps.filter(app => app[5] === id).map(app => appSetting(app)).join('')}</section>`).join('')}
       <div class="callout">Prototype controls only. Turning off Study and Learn also clears pre-selection. No tenant settings are changed. <a href="#safety">Review or recalculate student age groups in Student safety.</a></div>`;
   }
@@ -244,7 +247,7 @@
     let body = '';
     if (wizard.step === 0) body = `<h2>What kind of institution is this?</h2><p>Current: ${institutionLabels[state.institution]}. Institution type sets the defaults for education experiences.</p><div role="radiogroup" aria-label="Setup institution type">${institutions(wizard.institution, 'w-institution')}</div>`;
     if (wizard.step === 1) body = `<h2>Classify students by age group</h2><p>Current classification source: ${sourceLabels[state.source]}.</p>${assessmentSummary('setup-age')}<p class="small" style="margin-top:12px">Recalculation checks saved tenant data only. Your setup selections are not applied until you select Apply.</p><div role="radiogroup" aria-label="Setup classification source">${sourceOptions(wizard.source, 'w-source')}</div>${mappings(wizard.source, wizard, 'w-')}${!state.classified ? `<label class="option"><input type="checkbox" data-w-field="classify" ${wizard.classify ? 'checked' : ''}><span>Classify 3,412 sample students when applying</span></label>` : ''}`;
-    if (wizard.step === 2) body = `<h2>Choose AI experiences</h2><p>Current settings are pre-filled. Change only what you need for your institution.</p>${apps.map(app => appSetting(app, wizard.apps, true)).join('')}`;
+    if (wizard.step === 2) body = `<h2>Choose AI experiences</h2><p>Current settings are pre-filled. Change only what you need for your institution. <strong>New</strong> marks new admin controls in this concept, not newly released apps or shipping availability.</p>${apps.map(app => appSetting(app, wizard.apps, true)).join('')}`;
     if (wizard.step === 3) body = `<h2>Bring in learning data</h2><p>School Data Sync drives identity. Canvas LTI is already installed, but agent data needs a separate connection.</p>${!state.sdsHealthy ? `<label class="option box"><input type="checkbox" data-w-field="sync" ${wizard.sync ? 'checked' : ''}><span><strong>Retry School Data Sync</strong><p>Simulate resolving 27 failed records.</p></span></label>` : badge('School Data Sync healthy', 'good')}<label class="option box"><input type="checkbox" data-w-field="canvas" ${wizard.canvas ? 'checked' : ''}><span><strong>Connect Canvas to agents</strong><p>Courses, assignments, rubrics and submission status for 214 classes. This demo simulates consent.</p></span></label><div class="callout">OpenStax is ${state.openstax ? 'on' : 'off'}. Change its agent availability from Connectors &amp; data.</div>`;
     if (wizard.step === 4) {
       const list = changes();
