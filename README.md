@@ -6,7 +6,13 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
 
 ## Try the demo
 
-- **Overview:** live sample readiness assessment and recent changes.
+- **Overview:** sample readiness assessment and recent changes. The student
+  age-group count is a saved snapshot, refreshed automatically every 24 hours
+  while the demo is open or on the next visit after the snapshot expires.
+  **Recalculate now** refreshes it immediately, shows progress, updates the
+  last-checked timestamp, and reports the before/after count. Classification
+  changes do not silently refresh this snapshot; the banner prompts you to
+  recalculate. Student age-group readiness uses the same snapshot.
 - **Guided setup:** review institution type, age classification, nine app settings
   and data connections. Apply only differences and return to the updated overview.
 - **Student safety:** choose classification sources, edit group or grade mappings,
@@ -45,3 +51,5 @@ this repository; do not add internal documents or workspace files.
 - Owner-provided **Education Admin Hub** North Star concept, October 2026.
   The internal source document is intentionally not included in this public repo.
 - The existing Education Admin Hub prototype in this repository.
+- Owner feedback, October 19, 2026: age-group counts refresh once every 24 hours;
+  admins need an on-demand recalculation after classification.
