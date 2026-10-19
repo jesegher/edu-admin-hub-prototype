@@ -31,8 +31,8 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
   Study and Learn agent, Teach module, Educator Insights agent, Reading Progress,
   Search Coach, Speaker Progress and Math Progress. Badges identify new controls in this
   concept, not new apps or shipping availability; all other controls are unmarked.
-- **Connectors & data:** review and retry sample sync errors, distinguish Canvas
-  LTI installation from agent data, simulate connector consent and disconnects,
+- **Connectors & data:** review and retry sample sync errors, connect Canvas
+  agent data, simulate connector consent and disconnects,
   and control OpenStax availability. Recalculate age-group counts in the School
   Data Sync section after a roster sync. This does not rerun sync, grant agent
   access or apply classification. App toggles and agent connectors keep their
