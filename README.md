@@ -13,7 +13,10 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
   last-checked timestamp, and reports the before/after count. Classification
   changes do not silently refresh this snapshot; the banner prompts you to
   recalculate. Student age-group readiness uses the same snapshot, with a direct
-  recalculation action in its table row.
+  recalculation action in its table row. The **Quick overview** section groups
+  institution type and student, educator and school totals. Status badges use
+  red for **Action needed** (including action counts) and yellow for
+  **Needs review** (including nonzero review counts), in light and dark themes.
 - **Guided setup:** review institution type, age classification, nine app settings
   and data connections. Recalculate from the age-group step, review step or
   completion screen without leaving setup. Recalculation checks saved data only;

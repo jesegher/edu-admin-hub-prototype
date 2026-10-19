@@ -80,7 +80,11 @@
   let recalculateTimer;
   let recalculating = false;
   const escape = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
-  const badge = (label, kind = 'neutral') => `<span class="badge ${kind}">${escape(label)}</span>`;
+  const badge = (label, kind = 'neutral') => {
+    if (/^(?:[1-9]\d* )?action needed$/i.test(label)) kind = 'bad';
+    else if (/^(?:needs review|[1-9]\d* to review)$/i.test(label)) kind = 'warn';
+    return `<span class="badge ${kind}">${escape(label)}</span>`;
+  };
   const button = (label, action, primary = false, extra = '') => `<button class="btn${primary ? ' primary' : ''}" data-action="${action}" ${extra}>${escape(label)}</button>`;
   const link = (label, target, primary = false) => `<a class="btn${primary ? ' primary' : ''}" href="#${target}">${escape(label)}</a>`;
   const feeds = names => `<div class="feeds">${names.split(', ').map(name => `<span class="feed">${escape(name)}</span>`).join('')}</div>`;
@@ -141,8 +145,7 @@
     const rows = readiness();
     const ready = rows.filter(row => row[0]).length;
     return heading('Education', 'Every setting that shapes teaching, learning and student safety for Contoso Unified School District, in one place. Changes made here sync with Teams, Entra and Purview in the concept; this demo changes sample data only.') +
-      `<div class="tenant">${badge(institutionLabels[state.institution], 'info')}<span>18,940 students</span><span>1,612 educators</span><span>41 schools</span></div>
-      <div style="height:24px"></div>
+      `<section class="card padded" aria-labelledby="quick-overview-title"><h2 id="quick-overview-title">Quick overview</h2><div class="tenant">${badge(institutionLabels[state.institution], 'info')}<span>18,940 students</span><span>1,612 educators</span><span>41 schools</span></div></section>
       ${state.ageAssessment.unclassified ? `<div class="banner"><span class="banner-icon" aria-hidden="true">&#9888;</span><div><strong>3,412 students don't have an age group yet</strong><p>Microsoft AI experiences use age group to decide what each student can access.</p>${assessmentControls('overview')}</div><div class="actions">${link('Start guided setup', 'setup', true)}${link('Review students', 'safety')}</div></div>` : `<div class="callout" style="margin-bottom:24px"><strong>All sample students have an age group</strong><p>0 unclassified students. Explore Apps &amp; agents or finish connecting learning data.</p>${assessmentControls('overview')}</div>`}
       <section class="card padded"><div class="section-head"><h2>Tenant readiness</h2>${link('Fix with guided setup', 'setup')}</div><p class="small">Checks age groups, roster sync, institution type, AI experiences and data connections</p>
       <div class="readiness"><div class="ring" style="--progress:${ready * 20}"><span>${ready}/5</span></div><div><h3>${ready} of 5 areas ready for students</h3><p>Student age groups use the last checked count. Recalculate above to refresh after classification.</p></div></div>
