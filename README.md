@@ -12,17 +12,26 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
   **Recalculate now** refreshes it immediately, shows progress, updates the
   last-checked timestamp, and reports the before/after count. Classification
   changes do not silently refresh this snapshot; the banner prompts you to
-  recalculate. Student age-group readiness uses the same snapshot.
+  recalculate. Student age-group readiness uses the same snapshot, with a direct
+  recalculation action in its table row.
 - **Guided setup:** review institution type, age classification, nine app settings
-  and data connections. Apply only differences and return to the updated overview.
+  and data connections. Recalculate from the age-group step, review step or
+  completion screen without leaving setup. Recalculation checks saved data only;
+  it never applies draft selections. Apply only differences.
 - **Student safety:** choose classification sources, edit group or grade mappings,
   simulate CSV validation/import, preview illustrative counts and apply sample
-  classifications. No real files are uploaded.
+  classifications, then recalculate beside the completed classification action
+  or beside the counts, without leaving the page. Counts,
+  breakdowns, readiness and timestamps all use the same saved assessment.
+  No real files are uploaded.
 - **Apps & agents:** filter and toggle settings. Disabling Study and Learn also
   clears and disables pre-selection.
 - **Connectors & data:** review and retry sample sync errors, distinguish Canvas
   LTI installation from agent data, simulate connector consent and disconnects,
-  and control OpenStax availability.
+  and control OpenStax availability. Recalculate age-group counts in the School
+  Data Sync section after a roster sync. This does not rerun sync, grant agent
+  access or apply classification. App toggles and agent connectors keep their
+  immediate setting updates; they do not need age-group recalculation.
 - **Reset demo:** restore the original sample tenant for another walkthrough.
 
 Applied settings and the sample audit log persist in this browser's local storage.
@@ -52,4 +61,5 @@ this repository; do not add internal documents or workspace files.
   The internal source document is intentionally not included in this public repo.
 - The existing Education Admin Hub prototype in this repository.
 - Owner feedback, October 19, 2026: age-group counts refresh once every 24 hours;
-  admins need an on-demand recalculation after classification.
+  admins need an on-demand recalculation after classification, available at
+  relevant points throughout the demo rather than only on Overview.

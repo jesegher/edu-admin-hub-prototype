@@ -84,13 +84,18 @@
   const link = (label, target, primary = false) => `<a class="btn${primary ? ' primary' : ''}" href="#${target}">${escape(label)}</a>`;
   const feeds = names => `<div class="feeds">${names.split(', ').map(name => `<span class="feed">${escape(name)}</span>`).join('')}</div>`;
   const heading = (title, description, action = '') => `<div class="crumb">Settings &rsaquo; Education${title === 'Education' ? '' : ` &rsaquo; ${escape(title)}`}</div><div class="page-head"><div><h1>${escape(title)}</h1><p class="lede">${escape(description)}</p></div>${action}</div>`;
-  const ageCounts = () => state.classified ? [10804, 8014, 122, 0] : [9104, 6302, 122, 3412];
+  const ageCounts = (classified = state.classified) => classified ? [10804, 8014, 122, 0] : [9104, 6302, 122, 3412];
+  const assessedAgeCounts = () => ageCounts(state.ageAssessment.unclassified === 0);
   const assessmentPending = () => state.ageAssessment.unclassified !== ageCounts()[3];
-  function assessmentControls() {
+  const recalculateButton = context => button(recalculating ? 'Recalculating...' : 'Recalculate now', 'recalculate', false, `data-recalculate-context="${context}" ${recalculating ? 'disabled' : ''}`);
+  function assessmentControls(context) {
     const date = new Date(state.ageAssessment.checkedAt);
     return `<div class="count-assessment" aria-busy="${recalculating}"><p class="small muted">Last checked <time datetime="${date.toISOString()}">${escape(date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</time> · Refreshes automatically every 24 hours.</p>
       ${assessmentPending() ? '<p class="small"><strong>Classification has changed. Recalculate to see the impact now.</strong></p>' : ''}
-      <div style="margin-top:10px">${button(recalculating ? 'Recalculating...' : 'Recalculate now', 'recalculate', false, recalculating ? 'disabled' : '')}</div></div>`;
+      <div style="margin-top:10px">${recalculateButton(context)}</div></div>`;
+  }
+  function assessmentSummary(context) {
+    return `<div class="callout"><strong>${state.ageAssessment.unclassified.toLocaleString()} unclassified students at the last check</strong>${assessmentControls(context)}</div>`;
   }
   function updateAgeAssessment() {
     state.ageAssessment = { unclassified: ageCounts()[3], checkedAt: Date.now() };
@@ -137,10 +142,10 @@
     return heading('Education', 'Every setting that shapes teaching, learning and student safety for Contoso Unified School District, in one place. Changes made here sync with Teams, Entra and Purview in the concept; this demo changes sample data only.') +
       `<div class="tenant">${badge(institutionLabels[state.institution], 'info')}<span>18,940 students</span><span>1,612 educators</span><span>41 schools</span></div>
       <div style="height:24px"></div>
-      ${state.ageAssessment.unclassified ? `<div class="banner"><span class="banner-icon" aria-hidden="true">&#9888;</span><div><strong>3,412 students don't have an age group yet</strong><p>Microsoft AI experiences use age group to decide what each student can access.</p>${assessmentControls()}</div><div class="actions">${link('Start guided setup', 'setup', true)}${link('Review students', 'safety')}</div></div>` : `<div class="callout" style="margin-bottom:24px"><strong>All sample students have an age group</strong><p>0 unclassified students. Explore Apps &amp; agents or finish connecting learning data.</p>${assessmentControls()}</div>`}
+      ${state.ageAssessment.unclassified ? `<div class="banner"><span class="banner-icon" aria-hidden="true">&#9888;</span><div><strong>3,412 students don't have an age group yet</strong><p>Microsoft AI experiences use age group to decide what each student can access.</p>${assessmentControls('overview')}</div><div class="actions">${link('Start guided setup', 'setup', true)}${link('Review students', 'safety')}</div></div>` : `<div class="callout" style="margin-bottom:24px"><strong>All sample students have an age group</strong><p>0 unclassified students. Explore Apps &amp; agents or finish connecting learning data.</p>${assessmentControls('overview')}</div>`}
       <section class="card padded"><div class="section-head"><h2>Tenant readiness</h2>${link('Fix with guided setup', 'setup')}</div><p class="small">Checks age groups, roster sync, institution type, AI experiences and data connections</p>
       <div class="readiness"><div class="ring" style="--progress:${ready * 20}"><span>${ready}/5</span></div><div><h3>${ready} of 5 areas ready for students</h3><p>Student age groups use the last checked count. Recalculate above to refresh after classification.</p></div></div>
-      <div class="table-wrap"><table><thead><tr><th>Status</th><th>Area</th><th>What we found</th><th><span class="sr-only">Action</span></th></tr></thead><tbody>${rows.map(([ok, area, description, target, action, status], index) => `<tr><td>${badge(ok ? 'Ready' : status, ok ? 'good' : index === 0 ? 'bad' : index === 2 ? 'info' : 'warn')}</td><td><strong>${area}</strong></td><td><p>${escape(description)}</p></td><td><a href="#${target}">${ok ? 'View' : action}</a></td></tr>`).join('')}</tbody></table></div></section>
+      <div class="table-wrap"><table><thead><tr><th>Status</th><th>Area</th><th>What we found</th><th><span class="sr-only">Action</span></th></tr></thead><tbody>${rows.map(([ok, area, description, target, action, status], index) => `<tr><td>${badge(ok ? 'Ready' : status, ok ? 'good' : index === 0 ? 'bad' : index === 2 ? 'info' : 'warn')}</td><td><strong>${area}</strong></td><td><p>${escape(description)}</p></td><td>${index === 0 ? `${recalculateButton('readiness')}<br>` : ''}<a href="#${target}">${index === 0 && assessmentPending() ? 'Review classification' : ok ? 'View' : action}</a></td></tr>`).join('')}</tbody></table></div></section>
       <div class="tiles">${[
         ['safety', '&#9826;', 'Student safety', 'Institution type and student age groups', state.ageAssessment.unclassified === 0 ? 'All students classified' : assessmentPending() ? 'Recalculation needed' : '1 action needed'],
         ['apps', '&#8862;', 'Apps & agents', 'Copilot agents and Learning Accelerators', '9 settings'],
@@ -168,16 +173,17 @@
     return '<div class="callout">Birth-date classification uses the date of birth from your SIS. This demo previews the method only; no real dates of birth are collected.</div>';
   }
   function safety() {
-    const counts = ageCounts();
+    const counts = assessedAgeCounts();
     return heading('Student safety', 'Tell us what kind of institution you are and classify your students by age group, so Microsoft AI experiences are appropriate for every student.') +
       `<section class="card padded"><div class="section-head"><h2>Institution type</h2>${badge('Saved in demo', 'neutral')}</div><p class="small">Your institution type sets the defaults for every education experience, including which AI features are on by default.</p><div role="radiogroup" aria-label="Institution type">${institutions(state.institution, 'institution')}</div></section>
-      <section class="card padded"><div class="section-head"><h2>Student age groups</h2>${badge(state.classified ? 'All classified' : '3,412 unclassified', state.classified ? 'good' : 'bad')}</div><p class="small">Students are classified by their Microsoft Entra ID age group so AI experiences are appropriate for their age.</p>
-      <div class="stats">${['Minor', 'Not adult', 'Adult', 'Unclassified'].map((age, index) => `<div class="stat${index === 3 && !state.classified ? ' alert' : ''}"><span>${age}</span><strong>${counts[index].toLocaleString()}</strong></div>`).join('')}</div>
+      <section class="card padded"><div class="section-head"><h2>Student age groups</h2>${badge(counts[3] === 0 ? 'All classified' : '3,412 unclassified', counts[3] === 0 ? 'good' : 'bad')}</div><p class="small">Students are classified by their Microsoft Entra ID age group so AI experiences are appropriate for their age. Counts below reflect the last assessment.</p>
+      <div class="stats">${['Minor', 'Not adult', 'Adult', 'Unclassified'].map((age, index) => `<div class="stat${index === 3 && counts[3] > 0 ? ' alert' : ''}"><span>${age}</span><strong>${counts[index].toLocaleString()}</strong></div>`).join('')}</div>
       <div class="breakdown" role="img" aria-label="${counts.map((count, index) => `${count} ${['minor', 'not adult', 'adult', 'unclassified'][index]}`).join(', ')}">${counts.map(count => `<span style="flex:${count};${count === 0 ? 'display:none' : ''}"></span>`).join('')}</div>
+      ${assessmentControls('safety')}
       <h3 style="margin-top:24px">Classification source</h3><div role="radiogroup" aria-label="Classification source">${sourceOptions(state.source, 'source')}</div>
       ${mappings(state.source, state, '')}
       <div class="callout">Students without an age group are handled by the Copilot eligibility check. Classifying them gives them the experiences intended for their age group.</div>
-      <div class="actions" style="margin-top:20px">${button(state.classified ? 'Preview classification' : 'Preview 3,412 classifications', 'classify', true, state.source === 'csv' && !state.csvReady ? 'disabled' : '')}<span class="small muted">${state.source === 'csv' && !state.csvReady ? 'Load the sample CSV before classifying students.' : 'Preview and confirm before applying sample changes.'}</span></div></section>`;
+      <div class="actions" style="margin-top:20px">${button(state.classified ? 'Preview classification' : 'Preview 3,412 classifications', 'classify', true, state.source === 'csv' && !state.csvReady ? 'disabled' : '')}${assessmentPending() ? recalculateButton('safety-applied') : ''}<span class="small muted">${state.source === 'csv' && !state.csvReady ? 'Load the sample CSV before classifying students.' : state.classified ? assessmentPending() ? 'Classification applied. Recalculate to refresh these counts.' : 'Sample classification has already been applied.' : 'Preview and confirm before applying sample changes.'}</span></div></section>`;
   }
   function appSetting(app, model = state.apps, wizardMode = false) {
     const [id, title, description, audience, source] = app;
@@ -188,7 +194,7 @@
     return heading('Apps & agents', 'Copilot agents and Learning Accelerators, gathered from Copilot settings and Microsoft Education settings.') +
       `<div class="filters" role="group" aria-label="Filter settings">${[['all', 'All settings'], ['cp', 'Copilot & agents'], ['la', 'Learning Accelerators']].map(([id, label]) => `<button class="btn" data-filter="${id}" aria-pressed="${filter === id}">${escape(label)}</button>`).join('')}</div>
       ${[['cp', 'Copilot & agents'], ['la', 'Learning Accelerators']].filter(([id]) => filter === 'all' || filter === id).map(([id, title]) => `<section class="card padded"><div class="section-head"><h2>${escape(title)}</h2>${badge('Saved automatically', 'neutral')}</div>${apps.filter(app => app[5] === id).map(app => appSetting(app)).join('')}</section>`).join('')}
-      <div class="callout">Prototype controls only. Turning off Study and Learn also clears pre-selection. No tenant settings are changed.</div>`;
+      <div class="callout">Prototype controls only. Turning off Study and Learn also clears pre-selection. No tenant settings are changed. <a href="#safety">Review or recalculate student age groups in Student safety.</a></div>`;
   }
   function toggle(id, label, checked, disabled = false) {
     return `<label class="option"><input type="checkbox" id="toggle-${id}" data-toggle="${id}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''}><span>${label}</span></label>`;
@@ -201,7 +207,8 @@
         ['Agent data', 'Agent connectors', 'LMS & content → Copilot agents', 'Courses, assignments, rubrics and curriculum for Teach, Study and Learn and Educator Insights.']
       ].map(([category, title, direction, description]) => `<div class="tile"><span class="eyebrow">${category}</span><h3>${title}</h3><strong class="small">${direction}</strong><p>${description}</p></div>`).join('')}</div>
       <section class="card padded"><div class="section-head"><h2>School Data Sync</h2>${badge(state.sdsHealthy ? 'Healthy' : '27 records failed', state.sdsHealthy ? 'good' : 'warn')}</div><p class="small">Creates and updates users, groups and classes from your student information system.</p>
-      <div class="connector-row"><span class="connector-logo">SD</span><div class="copy"><h3>PowerSchool SIS via OneRoster</h3><p>18,940 students · 1,612 educators · 2,860 classes</p>${feeds('Users, Groups, Classes')}<p>${state.sdsHealthy ? 'Last sample sync: just now' : 'Last sync 3 days ago'}</p></div>${button(state.sdsHealthy ? 'View sync details' : 'Review 27 errors', 'sds')}</div></section>
+      <div class="connector-row"><span class="connector-logo">SD</span><div class="copy"><h3>PowerSchool SIS via OneRoster</h3><p>18,940 students · 1,612 educators · 2,860 classes</p>${feeds('Users, Groups, Classes')}<p>${state.sdsHealthy ? 'Last sample sync: just now' : 'Last sync 3 days ago'}</p></div>${button(state.sdsHealthy ? 'View sync details' : 'Review 27 errors', 'sds')}</div>
+      <p class="small">After syncing rosters or applying classification, recalculate student age-group counts. Recalculation checks saved data; it does not rerun roster sync or classify students.</p>${assessmentSummary('roster')}</section>
       <section class="card padded"><div class="section-head"><h2>LMS integrations</h2>${badge('LTI 1.3', 'neutral')}</div><p class="small">Apps that put Microsoft experiences inside your learning management system. Installing an LTI app does not connect agent data.</p>
       <div class="connector-row"><span class="connector-logo">CA</span><div class="copy"><h3>Canvas</h3><p>Used in 214 courses</p>${feeds('Teams meetings, Assignments, OneDrive, Reflect')}</div>${badge('Installed', 'good')}${button('View integration', 'lti')}</div>
       <p class="small">Schoology · Moodle · D2L Brightspace: not installed in this sample tenant.</p></section>
@@ -231,17 +238,17 @@
   }
   function wizardScreen() {
     const top = heading('Guided setup', 'Set up Microsoft Education for your district. See what is set today next to your proposed changes. Only differences are applied, to sample data only.');
-    if (successCount !== null) return top + `<section class="card padded"><div class="success-mark" aria-hidden="true">&#10003;</div><h2>${successCount} sample changes applied</h2><p style="margin:12px 0 24px">Settings and the audit log now reflect these changes. The overview age-group count refreshes every 24 hours; select Recalculate now on Overview to see classification impact immediately. No real tenant was modified.</p><div class="actions">${link('View tenant readiness', 'overview', true)}${button('Review settings again', 'wizard-restart')}</div></section>`;
+    if (successCount !== null) return top + `<section class="card padded"><div class="success-mark" aria-hidden="true">&#10003;</div><h2>${successCount} sample changes applied</h2><p style="margin:12px 0 24px">Settings and the audit log now reflect these changes. Recalculate here to see classification impact immediately, without waiting for the next 24-hour refresh. No real tenant was modified.</p>${assessmentSummary('setup-complete')}<div class="actions" style="margin-top:20px">${link('View tenant readiness', 'overview', true)}${button('Review settings again', 'wizard-restart')}</div></section>`;
     if (!wizard) wizard = makeWizard();
     const titles = ['Institution type', 'Student age groups', 'AI experiences', 'Connect data', 'Review & apply'];
     let body = '';
     if (wizard.step === 0) body = `<h2>What kind of institution is this?</h2><p>Current: ${institutionLabels[state.institution]}. Institution type sets the defaults for education experiences.</p><div role="radiogroup" aria-label="Setup institution type">${institutions(wizard.institution, 'w-institution')}</div>`;
-    if (wizard.step === 1) body = `<h2>Classify students by age group</h2><p>Current: ${sourceLabels[state.source]}. ${state.classified ? 'All students are classified.' : '3,412 students are unclassified.'}</p><div role="radiogroup" aria-label="Setup classification source">${sourceOptions(wizard.source, 'w-source')}</div>${mappings(wizard.source, wizard, 'w-')}${!state.classified ? `<label class="option"><input type="checkbox" data-w-field="classify" ${wizard.classify ? 'checked' : ''}><span>Classify 3,412 sample students when applying</span></label>` : ''}`;
+    if (wizard.step === 1) body = `<h2>Classify students by age group</h2><p>Current classification source: ${sourceLabels[state.source]}.</p>${assessmentSummary('setup-age')}<p class="small" style="margin-top:12px">Recalculation checks saved tenant data only. Your setup selections are not applied until you select Apply.</p><div role="radiogroup" aria-label="Setup classification source">${sourceOptions(wizard.source, 'w-source')}</div>${mappings(wizard.source, wizard, 'w-')}${!state.classified ? `<label class="option"><input type="checkbox" data-w-field="classify" ${wizard.classify ? 'checked' : ''}><span>Classify 3,412 sample students when applying</span></label>` : ''}`;
     if (wizard.step === 2) body = `<h2>Choose AI experiences</h2><p>Current settings are pre-filled. Change only what you need for your institution.</p>${apps.map(app => appSetting(app, wizard.apps, true)).join('')}`;
     if (wizard.step === 3) body = `<h2>Bring in learning data</h2><p>School Data Sync drives identity. Canvas LTI is already installed, but agent data needs a separate connection.</p>${!state.sdsHealthy ? `<label class="option box"><input type="checkbox" data-w-field="sync" ${wizard.sync ? 'checked' : ''}><span><strong>Retry School Data Sync</strong><p>Simulate resolving 27 failed records.</p></span></label>` : badge('School Data Sync healthy', 'good')}<label class="option box"><input type="checkbox" data-w-field="canvas" ${wizard.canvas ? 'checked' : ''}><span><strong>Connect Canvas to agents</strong><p>Courses, assignments, rubrics and submission status for 214 classes. This demo simulates consent.</p></span></label><div class="callout">OpenStax is ${state.openstax ? 'on' : 'off'}. Change its agent availability from Connectors &amp; data.</div>`;
     if (wizard.step === 4) {
       const list = changes();
-      body = `<h2>Review ${list.length} changes</h2><p>Compare with the current sample tenant. Nothing changes until you select Apply.</p>${wizard.source === 'csv' && wizard.classify && !state.csvReady ? '<div class="error" role="alert">Return to Student age groups and load the sample CSV before applying classification.</div>' : ''}${list.length ? `<ul class="change-list">${list.map(text => `<li>${escape(text)}</li>`).join('')}</ul>` : '<div class="callout">Everything already matches. There are no changes to apply.</div>'}`;
+      body = `<h2>Review ${list.length} changes</h2><p>Compare with the current sample tenant. Nothing changes until you select Apply. Recalculation checks saved data, not the proposed changes below.</p>${assessmentSummary('setup-review')}${wizard.source === 'csv' && wizard.classify && !state.csvReady ? '<div class="error" role="alert">Return to Student age groups and load the sample CSV before applying classification.</div>' : ''}${list.length ? `<ul class="change-list">${list.map(text => `<li>${escape(text)}</li>`).join('')}</ul>` : '<div class="callout">Everything already matches. There are no changes to apply.</div>'}`;
     }
     const canApply = changes().length && !(wizard.source === 'csv' && wizard.classify && !state.csvReady);
     return top + `<section class="card wizard"><ol class="steps" aria-label="Setup steps">${titles.map((title, index) => `<li><button class="step" data-step="${index}" ${wizard.step === index ? 'aria-current="step"' : ''}><span>${index + 1}</span>${escape(title)}</button></li>`).join('')}</ol><div class="wizard-body"><span class="eyebrow">Step ${wizard.step + 1} of 5</span>${body}<div class="wizard-foot">${link('Save and exit', 'overview')}<div class="actions">${wizard.step > 0 ? button('Back', 'wizard-back') : ''}${wizard.step < 4 ? button('Next', 'wizard-next', true) : button(`Apply ${changes().length} changes`, 'wizard-apply', true, canApply ? '' : 'disabled')}</div></div></div></section><p class="small">Setup selections stay in this tab when you leave and return. Applied sample settings are saved in this browser.</p>`;
@@ -270,14 +277,15 @@
   }
   function openDialog(title, content, confirmLabel, confirm) {
     dialog.innerHTML = `<h2 id="dialog-title">${escape(title)}</h2>${content}<div class="actions">${button('Cancel', 'dialog-cancel')}${confirmLabel ? button(confirmLabel, 'dialog-confirm', true) : button('Close', 'dialog-cancel')}</div>`;
-    dialog.querySelector('[data-action="dialog-cancel"]').onclick = () => dialog.close();
+    dialog.querySelectorAll('[data-action="dialog-cancel"]').forEach(button => { button.onclick = () => dialog.close(); });
     const confirmButton = dialog.querySelector('[data-action="dialog-confirm"]');
     if (confirmButton) confirmButton.onclick = () => { if (confirm() !== false) dialog.close(); };
     dialog.showModal();
   }
   function classificationDialog() {
-    openDialog('Preview student classification', `<p>Source: <strong>${sourceLabels[state.source]}</strong>. This is an illustrative sample result, not a calculation of eligibility from real students or your mappings.</p><div class="mapping"><div class="mapping-row"><strong>Minor</strong><span>9,104 → 10,804</span></div><div class="mapping-row"><strong>Not adult</strong><span>6,302 → 8,014</span></div><div class="mapping-row"><strong>Adult</strong><span>122 → 122</span></div><div class="mapping-row"><strong>Unclassified</strong><span>3,412 → 0</span></div></div><p>No personal data is read or written.</p>`, state.classified ? null : 'Apply sample classification', () => {
-      state.classified = true; record(`Classified 3,412 sample students using ${sourceLabels[state.source]}`); finish('Sample classification complete. Select Recalculate now on Overview to refresh the age-group count.');
+    const before = ageCounts(), after = ageCounts(true);
+    openDialog('Preview student classification', `<p>Source: <strong>${sourceLabels[state.source]}</strong>. This is an illustrative sample result, not a calculation of eligibility from real students or your mappings.</p><div class="mapping">${['Minor', 'Not adult', 'Adult', 'Unclassified'].map((label, index) => `<div class="mapping-row"><strong>${label}</strong><span>${before[index].toLocaleString()} → ${after[index].toLocaleString()}</span></div>`).join('')}</div><p>${state.classified ? 'Classification has already been applied. Recalculate on Student safety to refresh the assessed counts.' : 'After applying, select Recalculate now on Student safety to refresh the assessed counts.'} No personal data is read or written.</p>`, state.classified ? null : 'Apply sample classification', () => {
+      state.classified = true; record(`Classified 3,412 sample students using ${sourceLabels[state.source]}`); finish('Sample classification complete. Select Recalculate now here to refresh the age-group counts.');
     });
   }
   function connectionDialog(id) {
@@ -300,8 +308,9 @@
     });
   }
   const actions = {
-    recalculate: () => {
+    recalculate: target => {
       if (recalculating) return;
+      const startingRoute = route(), context = target.dataset.recalculateContext;
       const previous = state.ageAssessment.unclassified;
       recalculating = true;
       render(false);
@@ -312,7 +321,7 @@
         const current = state.ageAssessment.unclassified;
         record(`Recalculated student age groups: ${previous.toLocaleString()} → ${current.toLocaleString()} unclassified (sample data)`);
         finish(previous === current ? `Recalculation complete: ${current.toLocaleString()} unclassified students. No change since the last check.` : `Recalculation complete: ${previous.toLocaleString()} → ${current.toLocaleString()} unclassified students. ${previous - current} fewer students need classification.`);
-        if (route() === 'overview' && !dialog.open) main.querySelector('[data-action="recalculate"]')?.focus({ preventScroll: true });
+        if (route() === startingRoute && !dialog.open) (main.querySelector(`[data-recalculate-context="${context}"]`) || main.querySelector('[data-action="recalculate"]'))?.focus({ preventScroll: true });
       }, 700);
     },
     'csv-preview': () => openDialog('Review sample CSV', '<p>Illustrative rows from a fictional 3,412-student import. Validation and upload are simulated, not performed on a real file.</p><pre class="csv-sample">sampleUserId,ageGroup\nsample-001,Minor\nsample-002,Not adult\nsample-003,Minor</pre><div class="callout">Sample validation: required columns present, no duplicate sample identifiers, and recognized age-group values. The full cohort uses fixed illustrative counts.</div>', 'Simulate CSV upload', () => {
@@ -347,7 +356,7 @@
   document.addEventListener('click', event => {
     const target = event.target.closest('button');
     if (!target) return;
-    if (target.dataset.action && actions[target.dataset.action]) actions[target.dataset.action]();
+    if (target.dataset.action && actions[target.dataset.action]) actions[target.dataset.action](target);
     if (target.dataset.action === 'connect') connectionDialog(target.dataset.id);
     if (target.dataset.action === 'disconnect') {
       const id = target.dataset.id;
