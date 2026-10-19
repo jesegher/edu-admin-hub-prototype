@@ -20,8 +20,9 @@ Live: https://jesegher.github.io/edu-admin-hub-prototype/
   it never applies draft selections. Apply only differences.
 - **Student safety:** choose classification sources, edit group or grade mappings,
   simulate CSV validation/import, preview illustrative counts and apply sample
-  classifications, then recalculate beside the completed classification action
-  or beside the counts, without leaving the page. Counts,
+  classifications. Recalculation is always available beside the classification
+  actions and beside the counts, including before preview, without a loaded CSV,
+  and after reaching zero unclassified students. Counts,
   breakdowns, readiness and timestamps all use the same saved assessment.
   No real files are uploaded.
 - **Apps & agents:** filter and toggle settings. Disabling Study and Learn also
