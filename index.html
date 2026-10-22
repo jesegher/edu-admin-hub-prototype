@@ -6,25 +6,21 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="description" content="An interactive Education Admin Hub concept. Sample data only; not a committed product plan.">
   <title>Education | Microsoft 365 admin center concept</title>
-  <link rel="stylesheet" href="styles.css?v=20261019-connectors">
-  <script src="app.js?v=20261019-quick-overview" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261022-curriculum">
+  <script src="app.js?v=20261022-curriculum" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <div class="demo-band"><span><strong>North Star concept</strong> &middot; Not a committed plan &middot; All tenant data is sample data</span><button id="reset" class="text-button">Reset demo</button></div>
+  <div class="demo-band"><span><strong>North Star concept</strong> &middot; Not a committed plan &middot; All tenant data is sample data</span><div class="actions"><button class="text-button" data-action="scope">Scope &amp; dependencies</button><button id="reset" class="text-button">Reset demo</button></div></div>
   <header class="topbar">
     <span class="waffle" aria-hidden="true">&#9783;</span><strong>Microsoft 365 <span>admin center</span></strong>
     <span class="topbar-end">Contoso Unified School District <span class="avatar" aria-label="District admin">DA</span></span>
   </header>
   <div class="shell">
-    <nav aria-label="Education" class="sidebar">
-      <div class="nav-label">ADMIN CENTERS</div><div class="nav-title"><span class="education-icon" aria-hidden="true">&#9671;</span> Education</div>
-      <a href="#overview" data-nav="overview"><span aria-hidden="true">&#9638;</span> Overview</a>
-      <a href="#setup" data-nav="setup"><span aria-hidden="true">&#9776;</span> Guided setup</a>
-      <a href="#safety" data-nav="safety"><span aria-hidden="true">&#9826;</span> Student safety</a>
-      <a href="#apps" data-nav="apps"><span aria-hidden="true">&#8862;</span> Apps &amp; agents</a>
-      <a href="#connectors" data-nav="connectors"><span aria-hidden="true">&#8644;</span> Connectors &amp; data</a>
-      <div class="nav-footer"><span class="sample-dot"></span> Interactive demo<br><small>Changes stay in this browser.<br>No live services are connected.</small><button id="theme" class="text-button">Switch to dark theme</button></div>
+    <nav aria-label="Microsoft 365 admin center" class="sidebar">
+      <div class="nav-toolbar"><button id="nav-toggle" aria-label="Collapse navigation" aria-controls="admin-menu" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M3 12h18M3 19h18"/></svg></button></div>
+      <div id="admin-menu" class="admin-menu"></div>
+      <div class="nav-footer"><span class="sample-dot"></span> Interactive concept<br><small>Education placement is proposed for EDU tenants, subject to MAC approval. Other admin areas are context only. Changes stay in this browser.</small><button id="theme" class="text-button">Switch to dark theme</button></div>
     </nav>
     <main id="main" tabindex="-1"></main>
   </div>
